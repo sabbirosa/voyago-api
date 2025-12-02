@@ -24,12 +24,14 @@ interface AppConfig {
     expiresIn: number; // in seconds
     length: number;
   };
+  nodeEnv: "development" | "production";
 }
 
 export const config: AppConfig = {
   env: process.env.NODE_ENV || "development",
   port: Number(process.env.PORT) || 5000,
-  databaseUrl: process.env.DATABASE_URL || "postgres://user:pass@localhost:5432/voyago",
+  databaseUrl:
+    process.env.DATABASE_URL || "postgres://user:pass@localhost:5432/voyago",
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET || "voyago-access-secret",
     refreshSecret: process.env.JWT_REFRESH_SECRET || "voyago-refresh-secret",
@@ -50,6 +52,6 @@ export const config: AppConfig = {
     expiresIn: Number(process.env.OTP_EXPIRES_IN) || 600, // 10 minutes default
     length: 6,
   },
+  nodeEnv:
+    (process.env.NODE_ENV as "development" | "production") || "development",
 };
-
-

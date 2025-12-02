@@ -28,10 +28,3 @@ export const resendOTPSchema = z.object({
     email: z.string().email(),
   }),
 });
-
-export const verifyEmailSchema = z.object({
-  body: z.object({
-    token: z.string().min(10),
-  }),
-});
-

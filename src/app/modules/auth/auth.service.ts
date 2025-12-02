@@ -50,11 +50,10 @@ export const AuthService = {
       data: {
         name,
         email,
-        passwordHash,
+        password: passwordHash,
         role,
         isApproved: !requiresApproval,
         isEmailVerified: false,
-        emailVerifyToken: null,
       },
     });
 
@@ -62,8 +61,11 @@ export const AuthService = {
     const otp = generateOTP();
     await storeOTP(email, otp);
 
-    // Send OTP email (fire-and-forget)
-    void sendOTPEmail(email, otp, name);
+    // Send OTP email (non-blocking, errors are handled internally)
+    sendOTPEmail(email, otp, name).catch((error) => {
+      // Additional error handling if needed
+      console.error("[Auth] Failed to send OTP email:", error);
+    });
 
     return {
       user: {
@@ -95,7 +97,7 @@ export const AuthService = {
       throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
@@ -190,28 +192,10 @@ export const AuthService = {
     // Record resend attempt
     await recordOTPResend(email);
 
-    // Send OTP email
-    void sendOTPEmail(email, otp, user.name);
-  },
-
-  async verifyEmail(token: string): Promise<void> {
-    const user = await prisma.user.findFirst({
-      where: { emailVerifyToken: token },
-    });
-
-    if (!user) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Invalid or expired email verification token"
-      );
-    }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        isEmailVerified: true,
-        emailVerifyToken: null,
-      },
+    // Send OTP email (non-blocking, errors are handled internally)
+    sendOTPEmail(email, otp, user.name).catch((error) => {
+      // Additional error handling if needed
+      console.error("[Auth] Failed to resend OTP email:", error);
     });
   },
 };

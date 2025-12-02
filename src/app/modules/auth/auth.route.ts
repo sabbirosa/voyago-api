@@ -5,7 +5,6 @@ import {
   loginSchema,
   registerSchema,
   resendOTPSchema,
-  verifyEmailSchema,
   verifyOTPSchema,
 } from "./auth.validation";
 
@@ -60,19 +59,6 @@ router.post(
   "/resend-otp",
   validateRequest(resendOTPSchema),
   AuthController.resendOTP
-);
-
-/*
- * POST /api/auth/verify-email
- * Verify email (legacy endpoint)
- * @param {Object} req.body - The request body containing the verification token
- * @param {string} req.body.token - The verification token
- * @returns {Object} The response containing the success message
- */
-router.post(
-  "/verify-email",
-  validateRequest(verifyEmailSchema),
-  AuthController.verifyEmail
 );
 
 export const AuthRoutes = router;
