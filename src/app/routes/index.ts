@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AuthRoutes } from "../modules/auth/auth.route";
+import { ListingRoutes } from "../modules/listing/listing.route";
 import { UploadRoutes } from "../modules/upload/upload.route";
 import { UserRoutes } from "../modules/user/user.route";
 
@@ -9,8 +10,8 @@ const moduleRoutes = [
   { path: "/auth", route: AuthRoutes },
   { path: "/users", route: UserRoutes },
   { path: "/upload", route: UploadRoutes },
+  { path: "/listings", route: ListingRoutes },
   // Future modules:
-  // { path: "/listings", route: ListingRoutes },
   // { path: "/bookings", route: BookingRoutes },
   // { path: "/payments", route: PaymentRoutes },
 ];
@@ -27,6 +28,3 @@ router.get("/health", (_req, res) => {
 });
 
 export default router;
-
-
-

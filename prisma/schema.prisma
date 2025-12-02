@@ -6,7 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 enum UserRole {
   TOURIST
   GUIDE
@@ -14,17 +13,18 @@ enum UserRole {
 }
 
 model User {
-  id                String   @id @default(cuid())
-  name              String
-  email             String   @unique
-  password          String
-  role              UserRole @default(TOURIST)
-  isApproved        Boolean  @default(true)
-  isEmailVerified   Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  profile           UserProfile?
-  guideProfile      GuideProfile?
+  id              String        @id @default(cuid())
+  name            String
+  email           String        @unique
+  password        String
+  role            UserRole      @default(TOURIST)
+  isApproved      Boolean       @default(true)
+  isEmailVerified Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  profile         UserProfile?
+  guideProfile    GuideProfile?
+  listings        Listing[]
 }
 
 model UserProfile {
@@ -39,20 +39,86 @@ model UserProfile {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model GuideProfile {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  expertise         String[] @default([])
-  dailyRate         Float?
-  experienceYears   Int?
-  verificationStatus String  @default("PENDING")
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  expertise          String[] @default([])
+  dailyRate          Float?
+  experienceYears    Int?
+  verificationStatus String   @default("PENDING")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
 
+enum ListingCategory {
+  FOOD
+  ART
+  ADVENTURE
+  CULTURE
+  PHOTOGRAPHY
+  NIGHTLIFE
+  NATURE
+  ARCHITECTURE
+  SHOPPING
+  FAMILY
+  SPORTS
+  HISTORY
+}
+
+model Listing {
+  id           String          @id @default(cuid())
+  guideId      String
+  title        String
+  description  String
+  itinerary    String?
+  city         String
+  country      String
+  category     ListingCategory
+  languages    String[]        @default([])
+  tourFee      Float // Per person or per group
+  feeType      String          @default("PER_PERSON") // PER_PERSON or PER_GROUP
+  duration     Int // Duration in hours
+  meetingPoint String?
+  meetingLat   Float?
+  meetingLng   Float?
+  maxGroupSize Int
+  status       ListingStatus   @default(DRAFT)
+  avgRating    Float           @default(0)
+  totalReviews Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  deletedAt    DateTime?
+
+  guide  User           @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  images ListingImage[]
+
+  @@index([guideId])
+  @@index([city])
+  @@index([country])
+  @@index([category])
+  @@index([status])
+}
+
+model ListingImage {
+  id        String   @id @default(cuid())
+  listingId String
+  url       String
+  order     Int      @default(0) // For ordering images
+  createdAt DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+}
