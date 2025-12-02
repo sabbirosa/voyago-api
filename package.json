@@ -1,15 +1,41 @@
 {
   "name": "voyago-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Voyago backend API (Express + Prisma + PostgreSQL)",
+  "main": "dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "test": "echo \"No tests yet\" && exit 0"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.2.1"
+    "@prisma/adapter-pg": "^7.0.1",
+    "@prisma/client": "^7.0.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "helmet": "^8.0.0",
+    "http-status": "^2.0.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.16.3",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/pg": "^8.15.6",
+    "@types/node": "^24.10.1",
+    "@types/morgan": "^1.9.10",
+    "eslint": "^9.15.0",
+    "prisma": "^7.0.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3"
   }
 }
