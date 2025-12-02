@@ -5,6 +5,7 @@ import helmet from "helmet";
 import httpStatus from "http-status";
 import morgan from "morgan";
 
+import "./app/config/redis"; // Initialize Redis connection
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import { notFoundHandler } from "./app/middlewares/notFound";
 import apiRouter from "./app/routes";
