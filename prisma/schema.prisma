@@ -23,6 +23,36 @@ model User {
   isEmailVerified   Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  profile           UserProfile?
+  guideProfile      GuideProfile?
+}
+
+model UserProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  bio         String?
+  avatarUrl   String?
+  languages   String[] @default([])
+  city        String?
+  country     String?
+  preferences String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model GuideProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  expertise         String[] @default([])
+  dailyRate         Float?
+  experienceYears   Int?
+  verificationStatus String  @default("PENDING")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 

@@ -24,6 +24,13 @@ interface AppConfig {
     expiresIn: number; // in seconds
     length: number;
   };
+  r2: {
+    endpoint: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    bucketName: string;
+    publicUrl: string;
+  };
   nodeEnv: "development" | "production";
 }
 
@@ -51,6 +58,13 @@ export const config: AppConfig = {
   otp: {
     expiresIn: Number(process.env.OTP_EXPIRES_IN) || 600, // 10 minutes default
     length: 6,
+  },
+  r2: {
+    endpoint: process.env.R2_ENDPOINT || "",
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
+    bucketName: process.env.R2_BUCKET_NAME || "",
+    publicUrl: process.env.R2_PUBLIC_URL || "",
   },
   nodeEnv:
     (process.env.NODE_ENV as "development" | "production") || "development",
