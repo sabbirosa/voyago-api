@@ -70,4 +70,18 @@ export const AuthController = {
       data: null,
     });
   }),
+
+  getMe: catchAsync(async (req: Request, res: Response) => {
+    // req.user is set by checkAuth middleware
+    const user = await AuthService.getMe(req.user!.userId);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User profile retrieved successfully",
+      data: {
+        user,
+      },
+    });
+  }),
 };

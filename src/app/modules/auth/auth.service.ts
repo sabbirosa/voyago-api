@@ -198,4 +198,38 @@ export const AuthService = {
       console.error("[Auth] Failed to resend OTP email:", error);
     });
   },
+
+  async getMe(userId: string): Promise<{
+    id: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    isApproved: boolean;
+    isEmailVerified: boolean;
+  }> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isApproved: true,
+        isEmailVerified: true,
+      },
+    });
+
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role as UserRole,
+      isApproved: user.isApproved,
+      isEmailVerified: user.isEmailVerified,
+    };
+  },
 };

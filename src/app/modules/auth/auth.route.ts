@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { checkAuth } from "../../middlewares/checkAuth";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { AuthController } from "./auth.controller";
 import {
@@ -60,5 +61,12 @@ router.post(
   validateRequest(resendOTPSchema),
   AuthController.resendOTP
 );
+
+/*
+ * GET /api/auth/me
+ * Get current authenticated user profile
+ * Requires: Authentication
+ */
+router.get("/me", checkAuth, AuthController.getMe);
 
 export const AuthRoutes = router;
