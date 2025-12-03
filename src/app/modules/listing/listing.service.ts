@@ -72,10 +72,32 @@ export const ListingService = {
         images: {
           orderBy: { order: "asc" },
         },
+        guide: {
+          include: {
+            profile: true,
+            guideProfile: true,
+          },
+        },
+        reviews: {
+          take: 10,
+          orderBy: { createdAt: "desc" },
+          include: {
+            tourist: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
       },
     });
 
     if (!listing) {
+      throw new AppError(httpStatus.NOT_FOUND, "Listing not found");
+    }
+
+    // Check if listing is active (unless admin)
+    if (listing.status !== "ACTIVE" && listing.deletedAt) {
       throw new AppError(httpStatus.NOT_FOUND, "Listing not found");
     }
 
@@ -251,6 +273,49 @@ export const ListingService = {
       })),
       createdAt: listing.createdAt,
       updatedAt: listing.updatedAt,
+      guide: listing.guide
+        ? {
+            id: listing.guide.id,
+            name: listing.guide.name,
+            email: listing.guide.email,
+            profile: listing.guide.profile
+              ? {
+                  avatarUrl: listing.guide.profile.avatarUrl,
+                  bio: listing.guide.profile.bio,
+                  languages: listing.guide.profile.languages,
+                  city: listing.guide.profile.city,
+                  country: listing.guide.profile.country,
+                }
+              : undefined,
+            guideProfile: listing.guide.guideProfile
+              ? {
+                  expertise: listing.guide.guideProfile.expertise,
+                  dailyRate: listing.guide.guideProfile.dailyRate,
+                  experienceYears: listing.guide.guideProfile.experienceYears,
+                  verificationStatus:
+                    listing.guide.guideProfile.verificationStatus,
+                }
+              : undefined,
+          }
+        : undefined,
+      reviews: listing.reviews
+        ? listing.reviews.map((review: any) => ({
+            id: review.id,
+            rating: review.rating,
+            title: review.title,
+            comment: review.comment,
+            createdAt: review.createdAt,
+            tourist: {
+              id: review.tourist.id,
+              name: review.tourist.name,
+              profile: review.tourist.profile
+                ? {
+                    avatarUrl: review.tourist.profile.avatarUrl,
+                  }
+                : undefined,
+            },
+          }))
+        : undefined,
     };
   },
 };

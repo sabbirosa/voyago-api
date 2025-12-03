@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { AuthRoutes } from "../modules/auth/auth.route";
+import { BookingRoutes } from "../modules/booking/booking.route";
 import { ListingRoutes } from "../modules/listing/listing.route";
+import { PaymentRoutes } from "../modules/payment/payment.route";
 import { UploadRoutes } from "../modules/upload/upload.route";
 import { UserRoutes } from "../modules/user/user.route";
 
@@ -11,9 +13,8 @@ const moduleRoutes = [
   { path: "/users", route: UserRoutes },
   { path: "/upload", route: UploadRoutes },
   { path: "/listings", route: ListingRoutes },
-  // Future modules:
-  // { path: "/bookings", route: BookingRoutes },
-  // { path: "/payments", route: PaymentRoutes },
+  { path: "/bookings", route: BookingRoutes },
+  { path: "/payments", route: PaymentRoutes },
 ];
 
 moduleRoutes.forEach((route) => {

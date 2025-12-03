@@ -46,6 +46,38 @@ export interface IListingResponse {
   images: IListingImage[];
   createdAt: Date;
   updatedAt: Date;
+  guide?: {
+    id: string;
+    name: string;
+    email: string;
+    profile?: {
+      avatarUrl: string | null;
+      bio: string | null;
+      languages: string[];
+      city: string | null;
+      country: string | null;
+    };
+    guideProfile?: {
+      expertise: string[];
+      dailyRate: number | null;
+      experienceYears: number | null;
+      verificationStatus: string;
+    };
+  };
+  reviews?: Array<{
+    id: string;
+    rating: number;
+    title: string | null;
+    comment: string | null;
+    createdAt: Date;
+    tourist: {
+      id: string;
+      name: string;
+      profile?: {
+        avatarUrl: string | null;
+      };
+    };
+  }>;
 }
 
 export interface ICreateListingPayload {

@@ -25,6 +25,9 @@ model User {
   profile         UserProfile?
   guideProfile    GuideProfile?
   listings        Listing[]
+  bookingsAsTourist Booking[]   @relation("TouristBookings")
+  bookingsAsGuide Booking[]     @relation("GuideBookings")
+  reviews         Review[]
 }
 
 model UserProfile {
@@ -101,8 +104,10 @@ model Listing {
   updatedAt    DateTime        @updatedAt
   deletedAt    DateTime?
 
-  guide  User           @relation(fields: [guideId], references: [id], onDelete: Cascade)
-  images ListingImage[]
+  guide    User           @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  images   ListingImage[]
+  bookings Booking[]
+  reviews  Review[]
 
   @@index([guideId])
   @@index([city])
@@ -121,4 +126,90 @@ model ListingImage {
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@index([listingId])
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  PAID
+  COMPLETED
+  CANCELLED
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  listingId   String
+  touristId   String
+  guideId     String
+  date        DateTime
+  groupSize   Int
+  totalPrice  Float
+  platformFee Float         @default(0)
+  note        String?
+  status      BookingStatus  @default(PENDING)
+  cancelledAt DateTime?
+  cancelReason String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  tourist User    @relation("TouristBookings", fields: [touristId], references: [id], onDelete: Cascade)
+  guide   User    @relation("GuideBookings", fields: [guideId], references: [id], onDelete: Cascade)
+  payment Payment?
+  review  Review?
+
+  @@index([listingId])
+  @@index([touristId])
+  @@index([guideId])
+  @@index([status])
+  @@index([date])
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  bookingId             String        @unique
+  amount                Float
+  currency              String        @default("USD")
+  status                PaymentStatus @default(PENDING)
+  stripeCheckoutSessionId String?
+  stripePaymentIntentId String?
+  stripeCustomerId      String?
+  stripePaymentId       String?
+  paidAt                DateTime?
+  refundedAt            DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([status])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  listingId String
+  touristId String
+  rating    Int      // 1-5
+  title     String?
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  tourist User    @relation(fields: [touristId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([listingId])
+  @@index([touristId])
 }

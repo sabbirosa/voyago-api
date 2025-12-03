@@ -31,6 +31,11 @@ interface AppConfig {
     bucketName: string;
     publicUrl: string;
   };
+  stripe: {
+    secretKey: string;
+    publishableKey: string;
+    webhookSecret: string;
+  };
   nodeEnv: "development" | "production";
 }
 
@@ -65,6 +70,11 @@ export const config: AppConfig = {
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
     bucketName: process.env.R2_BUCKET_NAME || "",
     publicUrl: process.env.R2_PUBLIC_URL || "",
+  },
+  stripe: {
+    secretKey: process.env.STRIPE_SECRET_KEY || "",
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || "",
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
   },
   nodeEnv:
     (process.env.NODE_ENV as "development" | "production") || "development",
