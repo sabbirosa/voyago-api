@@ -33,6 +33,8 @@ model User {
   messagesReceived Message[]    @relation("MessageReceiver")
   availabilitySlots AvailabilitySlot[]
   notifications   Notification[]
+  wishlist        Wishlist[]   @relation("UserWishlist")
+  badges          UserBadge[]  @relation("UserBadges")
 }
 
 model UserProfile {
@@ -113,6 +115,7 @@ model Listing {
   images   ListingImage[]
   bookings Booking[]
   reviews  Review[]
+  wishlist Wishlist[]     @relation("ListingWishlist")
 
   @@index([guideId])
   @@index([city])
@@ -291,4 +294,40 @@ model Notification {
   @@index([readAt])
   @@index([createdAt])
   @@index([type])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation("UserWishlist", fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation("ListingWishlist", fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@index([listingId])
+}
+
+enum BadgeType {
+  SUPER_GUIDE
+  NEWCOMER
+  TOP_RATED
+  POPULAR
+  VERIFIED
+  EARLY_ADOPTER
+}
+
+model UserBadge {
+  id        String     @id @default(cuid())
+  userId    String
+  badgeType BadgeType
+  earnedAt  DateTime   @default(now())
+
+  user User @relation("UserBadges", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeType])
+  @@index([userId])
+  @@index([badgeType])
 }
