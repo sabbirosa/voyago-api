@@ -2,6 +2,8 @@ import httpStatus from "http-status";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../errorHelpers/AppError";
 import { QueryBuilder } from "../../utils/QueryBuilder";
+import { NotificationService } from "../notification/notification.service";
+import { NotificationType } from "../notification/notification.interface";
 import {
   BookingStatus,
   IBookingResponse,
@@ -106,6 +108,18 @@ export const BookingService = {
         note: payload.note,
         status: "PENDING",
       },
+    });
+
+    // Send notification to guide
+    await NotificationService.createNotification({
+      userId: listing.guideId,
+      type: NotificationType.BOOKING_REQUESTED,
+      title: "New Booking Request",
+      message: `You have a new booking request for "${listing.title}" on ${bookingDate.toLocaleDateString()}.`,
+      dataJson: { bookingId: booking.id, listingId: listing.id },
+    }).catch((error) => {
+      console.error("[Booking] Failed to send notification:", error);
+    });
       include: {
         listing: {
           include: {
@@ -285,6 +299,7 @@ export const BookingService = {
       where: { id: bookingId },
       include: {
         payment: true,
+        listing: true,
       },
     });
 
@@ -360,6 +375,44 @@ export const BookingService = {
             ? payload.reason || booking.cancelReason
             : booking.cancelReason,
       },
+      include: {
+        listing: true,
+      },
+    });
+
+    // Send notifications based on status change
+    if (payload.status === "ACCEPTED" && booking.status === "PENDING") {
+      await NotificationService.createNotification({
+        userId: booking.touristId,
+        type: NotificationType.BOOKING_ACCEPTED,
+        title: "Booking Accepted!",
+        message: `Your booking request for "${updated.listing.title}" has been accepted. You can now proceed with payment.`,
+        dataJson: { bookingId: booking.id },
+      }).catch((error) => {
+        console.error("[Booking] Failed to send notification:", error);
+      });
+    } else if (payload.status === "DECLINED" && booking.status === "PENDING") {
+      await NotificationService.createNotification({
+        userId: booking.touristId,
+        type: NotificationType.BOOKING_DECLINED,
+        title: "Booking Declined",
+        message: `Your booking request for "${updated.listing.title}" has been declined.`,
+        dataJson: { bookingId: booking.id },
+      }).catch((error) => {
+        console.error("[Booking] Failed to send notification:", error);
+      });
+    } else if (payload.status === "CANCELLED") {
+      const recipientId = userRole === "GUIDE" ? booking.touristId : booking.guideId;
+      await NotificationService.createNotification({
+        userId: recipientId,
+        type: NotificationType.BOOKING_CANCELLED,
+        title: "Booking Cancelled",
+        message: `A booking for "${updated.listing.title}" has been cancelled.`,
+        dataJson: { bookingId: booking.id, reason: payload.reason },
+      }).catch((error) => {
+        console.error("[Booking] Failed to send notification:", error);
+      });
+    }
       include: {
         listing: {
           include: {

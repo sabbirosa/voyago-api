@@ -226,13 +226,42 @@ export const PaymentService = {
       },
     });
 
+    // Get booking details for notification
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { listing: true },
+    });
+
     // Update booking status to PAID
     await prisma.booking.update({
       where: { id: bookingId },
       data: { status: "PAID" },
     });
 
-    // TODO: Send confirmation emails/notifications
+    // Send notifications
+    if (booking) {
+      // Notify tourist
+      await NotificationService.createNotification({
+        userId: booking.touristId,
+        type: NotificationType.PAYMENT_RECEIVED,
+        title: "Payment Successful!",
+        message: `Your payment for "${booking.listing.title}" has been confirmed. Your tour is booked!`,
+        dataJson: { bookingId, listingId: booking.listingId },
+      }).catch((error) => {
+        console.error("[Payment] Failed to send notification:", error);
+      });
+
+      // Notify guide
+      await NotificationService.createNotification({
+        userId: booking.guideId,
+        type: NotificationType.PAYMENT_RECEIVED,
+        title: "Payment Received",
+        message: `Payment has been received for booking "${booking.listing.title}".`,
+        dataJson: { bookingId, listingId: booking.listingId },
+      }).catch((error) => {
+        console.error("[Payment] Failed to send notification:", error);
+      });
+    }
   },
 
   async handlePaymentIntentSucceeded(
@@ -319,6 +348,12 @@ export const PaymentService = {
       return;
     }
 
+    // Get booking for notification
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { listing: true },
+    });
+
     // Update payment status to FAILED
     await prisma.payment.updateMany({
       where: {
@@ -331,6 +366,18 @@ export const PaymentService = {
     });
 
     // Booking stays as ACCEPTED (tourist can retry)
+    // Send notification to tourist
+    if (booking) {
+      await NotificationService.createNotification({
+        userId: booking.touristId,
+        type: NotificationType.PAYMENT_FAILED,
+        title: "Payment Failed",
+        message: `Your payment for "${booking.listing.title}" failed. Please try again.`,
+        dataJson: { bookingId, listingId: booking.listingId },
+      }).catch((error) => {
+        console.error("[Payment] Failed to send notification:", error);
+      });
+    }
   },
 
   async getPaymentByBookingId(
