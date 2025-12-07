@@ -1,18 +1,22 @@
 import { PrismaClient } from "@prisma/client";
+import httpStatus from "http-status";
 import { AppError } from "../../errorHelpers/AppError";
 import { IWishlistItem } from "./wishlist.interface";
 
 const prisma = new PrismaClient();
 
 export class WishlistService {
-  async addToWishlist(userId: string, listingId: string): Promise<IWishlistItem> {
+  async addToWishlist(
+    userId: string,
+    listingId: string
+  ): Promise<IWishlistItem> {
     // Check if listing exists
     const listing = await prisma.listing.findUnique({
       where: { id: listingId },
     });
 
     if (!listing) {
-      throw new AppError("Listing not found", 404);
+      throw new AppError(httpStatus.NOT_FOUND, "Listing not found");
     }
 
     // Check if already in wishlist
@@ -26,7 +30,7 @@ export class WishlistService {
     });
 
     if (existing) {
-      throw new AppError("Listing already in wishlist", 400);
+      throw new AppError(httpStatus.BAD_REQUEST, "Listing already in wishlist");
     }
 
     const wishlistItem = await prisma.wishlist.create({
@@ -60,7 +64,9 @@ export class WishlistService {
             category: wishlistItem.listing.category,
             tourFee: wishlistItem.listing.tourFee,
             avgRating: wishlistItem.listing.avgRating,
-            images: wishlistItem.listing.images.map((img) => ({ url: img.url })),
+            images: wishlistItem.listing.images.map((img) => ({
+              url: img.url,
+            })),
           }
         : undefined,
     };
@@ -77,7 +83,7 @@ export class WishlistService {
     });
 
     if (!wishlistItem) {
-      throw new AppError("Listing not in wishlist", 404);
+      throw new AppError(httpStatus.NOT_FOUND, "Listing not in wishlist");
     }
 
     await prisma.wishlist.delete({
@@ -166,4 +172,3 @@ export class WishlistService {
     return !!wishlistItem;
   }
 }
-

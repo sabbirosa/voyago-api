@@ -82,10 +82,10 @@ export const MessageService = {
     }
 
     // Use QueryBuilder for consistent query handling
-    const queryBuilder = new QueryBuilder(prisma.message, {})
+    const queryBuilder = new QueryBuilder(prisma.message, { page: "1", limit: "100" })
       .filter({ bookingId })
       .sort({ createdAt: "asc" }) // Oldest first for chat
-      .paginate({ page: 1, limit: 100 }) // Get all messages (or use pagination if needed)
+      .paginate() // Get all messages (or use pagination if needed)
       .includeRelations({
         fromUser: {
           include: {

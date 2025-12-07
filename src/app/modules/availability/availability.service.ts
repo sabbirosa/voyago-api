@@ -32,7 +32,7 @@ export const AvailabilityService = {
     const slot = await prisma.availabilitySlot.create({
       data: {
         guideId,
-        date,
+        date: date as Date,
         dayOfWeek: payload.dayOfWeek ?? null,
         startTime: payload.startTime,
         endTime: payload.endTime,

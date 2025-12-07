@@ -6,22 +6,24 @@ import { GuideService } from "./guide.service";
 const guideService = new GuideService();
 
 export const getGuideAnalytics = catchAsync(async (req: Request, res: Response) => {
-  const guideId = req.user!.id;
+  const guideId = req.user!.userId;
 
   const analytics = await guideService.getGuideAnalytics(guideId);
 
-  sendResponse(res, 200, {
+  sendResponse(res, {
+    statusCode: 200,
     success: true,
     data: analytics,
   });
 });
 
 export const getGuideBadges = catchAsync(async (req: Request, res: Response) => {
-  const guideId = req.user!.id;
+  const guideId = req.user!.userId;
 
   const badges = await guideService.getGuideBadges(guideId);
 
-  sendResponse(res, 200, {
+  sendResponse(res, {
+    statusCode: 200,
     success: true,
     data: badges,
   });

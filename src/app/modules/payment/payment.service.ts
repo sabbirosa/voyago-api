@@ -4,6 +4,8 @@ import { prisma } from "../../config/prisma";
 import { config } from "../../config/env";
 import { AppError } from "../../errorHelpers/AppError";
 import { BookingService } from "../booking/booking.service";
+import { NotificationService } from "../notification/notification.service";
+import { NotificationType } from "../notification/notification.interface";
 import {
   IPaymentResponse,
   PaymentStatus,
@@ -12,7 +14,7 @@ import {
 // Initialize Stripe
 const stripe = config.stripe.secretKey
   ? new Stripe(config.stripe.secretKey, {
-      apiVersion: "2024-12-18.acacia",
+      apiVersion: "2025-11-17.clover",
     })
   : null;
 
@@ -170,9 +172,8 @@ export const PaymentService = {
         break;
       }
 
-      case "charge.refunded":
-      case "payment_intent.refunded": {
-        const charge = event.data.object as Stripe.Charge | Stripe.PaymentIntent;
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
         await this.handleRefund(charge);
         break;
       }
@@ -247,7 +248,7 @@ export const PaymentService = {
         title: "Payment Successful!",
         message: `Your payment for "${booking.listing.title}" has been confirmed. Your tour is booked!`,
         dataJson: { bookingId, listingId: booking.listingId },
-      }).catch((error) => {
+      }).catch((error: unknown) => {
         console.error("[Payment] Failed to send notification:", error);
       });
 
@@ -258,7 +259,7 @@ export const PaymentService = {
         title: "Payment Received",
         message: `Payment has been received for booking "${booking.listing.title}".`,
         dataJson: { bookingId, listingId: booking.listingId },
-      }).catch((error) => {
+      }).catch((error: unknown) => {
         console.error("[Payment] Failed to send notification:", error);
       });
     }
@@ -296,12 +297,9 @@ export const PaymentService = {
   },
 
   async handleRefund(
-    charge: Stripe.Charge | Stripe.PaymentIntent
+    charge: Stripe.Charge
   ): Promise<void> {
-    const paymentId =
-      "payment_intent" in charge
-        ? charge.payment_intent
-        : charge.payment_intent || charge.id;
+    const paymentId = charge.payment_intent as string | undefined || charge.id;
 
     if (!paymentId) {
       console.error("No payment ID found in refund event");
@@ -374,7 +372,7 @@ export const PaymentService = {
         title: "Payment Failed",
         message: `Your payment for "${booking.listing.title}" failed. Please try again.`,
         dataJson: { bookingId, listingId: booking.listingId },
-      }).catch((error) => {
+      }).catch((error: unknown) => {
         console.error("[Payment] Failed to send notification:", error);
       });
     }

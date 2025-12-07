@@ -2,8 +2,8 @@ import httpStatus from "http-status";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../errorHelpers/AppError";
 import { QueryBuilder } from "../../utils/QueryBuilder";
-import { NotificationService } from "../notification/notification.service";
 import { NotificationType } from "../notification/notification.interface";
+import { NotificationService } from "../notification/notification.service";
 import {
   BookingStatus,
   IBookingResponse,
@@ -108,18 +108,6 @@ export const BookingService = {
         note: payload.note,
         status: "PENDING",
       },
-    });
-
-    // Send notification to guide
-    await NotificationService.createNotification({
-      userId: listing.guideId,
-      type: NotificationType.BOOKING_REQUESTED,
-      title: "New Booking Request",
-      message: `You have a new booking request for "${listing.title}" on ${bookingDate.toLocaleDateString()}.`,
-      dataJson: { bookingId: booking.id, listingId: listing.id },
-    }).catch((error) => {
-      console.error("[Booking] Failed to send notification:", error);
-    });
       include: {
         listing: {
           include: {
@@ -140,6 +128,19 @@ export const BookingService = {
           },
         },
       },
+    });
+
+    // Send notification to guide
+    await NotificationService.createNotification({
+      userId: listing.guideId,
+      type: NotificationType.BOOKING_REQUESTED,
+      title: "New Booking Request",
+      message: `You have a new booking request for "${
+        listing.title
+      }" on ${bookingDate.toLocaleDateString()}.`,
+      dataJson: { bookingId: booking.id, listingId: listing.id },
+    }).catch((error) => {
+      console.error("[Booking] Failed to send notification:", error);
     });
 
     return this.mapBookingToResponse(booking);
@@ -269,10 +270,7 @@ export const BookingService = {
 
     // Authorization check
     if (userRole !== "ADMIN") {
-      if (
-        userRole === "TOURIST" &&
-        booking.touristId !== userId
-      ) {
+      if (userRole === "TOURIST" && booking.touristId !== userId) {
         throw new AppError(
           httpStatus.FORBIDDEN,
           "You can only view your own bookings"
@@ -324,7 +322,7 @@ export const BookingService = {
     }
 
     // Validate status transitions
-    const validTransitions: Record<string, string[]> = {
+    const validTransitions: Record<string, Record<string, string[]> | {}> = {
       GUIDE: {
         PENDING: ["ACCEPTED", "DECLINED"],
         ACCEPTED: ["CANCELLED"],
@@ -339,8 +337,15 @@ export const BookingService = {
       },
     };
 
-    const roleTransitions = validTransitions[userRole];
-    if (roleTransitions && roleTransitions[booking.status]) {
+    const roleTransitions = validTransitions[userRole] as Record<
+      string,
+      string[]
+    >;
+    if (
+      roleTransitions &&
+      Object.keys(roleTransitions).length > 0 &&
+      roleTransitions[booking.status]
+    ) {
       if (!roleTransitions[booking.status].includes(payload.status)) {
         throw new AppError(
           httpStatus.BAD_REQUEST,
@@ -376,7 +381,26 @@ export const BookingService = {
             : booking.cancelReason,
       },
       include: {
-        listing: true,
+        listing: {
+          include: {
+            images: {
+              orderBy: { order: "asc" },
+              take: 1,
+            },
+          },
+        },
+        tourist: {
+          include: {
+            profile: true,
+          },
+        },
+        guide: {
+          include: {
+            profile: true,
+          },
+        },
+        payment: true,
+        review: true,
       },
     });
 
@@ -402,7 +426,8 @@ export const BookingService = {
         console.error("[Booking] Failed to send notification:", error);
       });
     } else if (payload.status === "CANCELLED") {
-      const recipientId = userRole === "GUIDE" ? booking.touristId : booking.guideId;
+      const recipientId =
+        userRole === "GUIDE" ? booking.touristId : booking.guideId;
       await NotificationService.createNotification({
         userId: recipientId,
         type: NotificationType.BOOKING_CANCELLED,
@@ -413,29 +438,6 @@ export const BookingService = {
         console.error("[Booking] Failed to send notification:", error);
       });
     }
-      include: {
-        listing: {
-          include: {
-            images: {
-              orderBy: { order: "asc" },
-              take: 1,
-            },
-          },
-        },
-        tourist: {
-          include: {
-            profile: true,
-          },
-        },
-        guide: {
-          include: {
-            profile: true,
-          },
-        },
-        payment: true,
-        review: true,
-      },
-    });
 
     return this.mapBookingToResponse(updated);
   },
@@ -513,4 +515,3 @@ export const BookingService = {
     };
   },
 };
-
