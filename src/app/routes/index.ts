@@ -15,6 +15,20 @@ import { WishlistRoutes } from "../modules/wishlist/wishlist.route";
 
 const router = Router();
 
+// Root route
+router.get("/", (_req, res) => {
+  res.json({
+    success: true,
+    message: "Voyago API is running...",
+    version: "v1",
+    api: "Voyago API",
+    status: "operational",
+    endpoints: {
+      health: "/api/v1/health",
+    },
+  });
+});
+
 const moduleRoutes = [
   { path: "/auth", route: AuthRoutes },
   { path: "/users", route: UserRoutes },

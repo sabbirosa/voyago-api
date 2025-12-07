@@ -3,7 +3,6 @@ import httpStatus from "http-status";
 import { prisma } from "../../config/prisma";
 import { config } from "../../config/env";
 import { AppError } from "../../errorHelpers/AppError";
-import { BookingService } from "../booking/booking.service";
 import { NotificationService } from "../notification/notification.service";
 import { NotificationType } from "../notification/notification.interface";
 import {

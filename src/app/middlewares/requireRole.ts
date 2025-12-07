@@ -10,7 +10,7 @@ import { UserRole } from "../modules/auth/auth.interface";
  * and have one of the specified roles
  */
 export const requireRole = (...allowedRoles: UserRole[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user) {
       throw new AppError(
         httpStatus.UNAUTHORIZED,

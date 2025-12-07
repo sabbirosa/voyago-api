@@ -13,7 +13,7 @@ import { verifyToken } from "../utils/jwt";
  */
 export const checkAuth = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {

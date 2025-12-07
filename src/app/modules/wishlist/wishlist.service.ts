@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import httpStatus from "http-status";
+import { prisma } from "../../config/prisma";
 import { AppError } from "../../errorHelpers/AppError";
 import { IWishlistItem } from "./wishlist.interface";
-
-const prisma = new PrismaClient();
 
 export class WishlistService {
   async addToWishlist(

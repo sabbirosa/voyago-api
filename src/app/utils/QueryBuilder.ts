@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { excludeField } from "../constants";
 
 type WhereInput = any; // Prisma where input type

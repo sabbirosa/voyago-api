@@ -57,7 +57,7 @@ export const AdminController = {
     });
   }),
 
-  getAnalytics: catchAsync(async (req: Request, res: Response) => {
+  getAnalytics: catchAsync(async (_req: Request, res: Response) => {
     const analytics = await AdminService.getAnalytics();
 
     sendResponse(res, {

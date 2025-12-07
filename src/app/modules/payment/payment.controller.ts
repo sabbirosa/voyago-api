@@ -33,7 +33,7 @@ export const PaymentController = {
     await PaymentService.handleWebhook(signature, req.body);
 
     // Return 200 to acknowledge receipt
-    res.status(httpStatus.OK).json({ received: true });
+    return res.status(httpStatus.OK).json({ received: true });
   }),
 
   getPaymentByBooking: catchAsync(async (req: Request, res: Response) => {

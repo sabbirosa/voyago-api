@@ -5,8 +5,9 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
+    "postinstall": "prisma generate",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "test": "echo \"No tests yet\" && exit 0"
   },
@@ -19,7 +20,6 @@
     "@prisma/client": "^7.0.1",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
-    "@types/uuid": "^10.0.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -36,7 +36,7 @@
     "react": "^19.2.0",
     "resend": "^6.5.2",
     "stripe": "^20.0.0",
-    "uuid": "^13.0.0",
+    "uuid": "9.0.1",
     "zod": "^4.0.0"
   },
   "devDependencies": {
@@ -47,6 +47,7 @@
     "@types/node": "^24.10.1",
     "@types/pg": "^8.15.6",
     "@types/react": "^19.2.7",
+    "@types/uuid": "9.0.8",
     "eslint": "^9.15.0",
     "prisma": "^7.0.1",
     "ts-node-dev": "^2.0.0",

@@ -1,12 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import { IGuideAnalytics, IGuideBadge } from "./guide.interface";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../config/prisma";
 
 export class GuideService {
   async getGuideAnalytics(guideId: string): Promise<IGuideAnalytics> {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     // Get all bookings for this guide
     const bookings = await prisma.booking.findMany({
