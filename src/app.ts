@@ -40,9 +40,19 @@ app.use("/api/v1", limiter);
 app.use("/api/v1/auth", authLimiter);
 
 // Stripe webhook needs raw body for signature verification
+// This must be applied BEFORE express.json() to ensure raw body is available
 app.use("/api/v1/payments/webhook", express.raw({ type: "application/json" }));
 
-app.use(express.json());
+// JSON body parser - exclude webhook route to preserve raw body for signature verification
+const jsonParser = express.json();
+app.use((req, res, next) => {
+  // Skip JSON parsing for webhook route (needs raw body for Stripe signature verification)
+  if (req.path === "/api/v1/payments/webhook") {
+    return next();
+  }
+  jsonParser(req, res, next);
+});
+
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
