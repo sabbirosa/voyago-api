@@ -169,21 +169,15 @@ export const BookingService = {
       );
     }
 
-    // Handle status filter
-    if (query.status) {
-      baseFilter.status = query.status;
-    }
-
-    // Handle upcoming/past filters
+    // Handle upcoming/past filters first (they take precedence)
     const now = new Date();
     if (query.upcoming === "true") {
+      baseFilter.date = { gte: now };
       if (userRole === "TOURIST") {
-        baseFilter.date = { gte: now };
         baseFilter.status = {
           in: ["PENDING", "ACCEPTED", "PAID"],
         };
       } else {
-        baseFilter.date = { gte: now };
         baseFilter.status = {
           in: ["ACCEPTED", "PAID"],
         };
@@ -193,6 +187,11 @@ export const BookingService = {
         { date: { lt: now } },
         { status: { in: ["COMPLETED", "CANCELLED"] } },
       ];
+    } else {
+      // Only apply status filter if not using upcoming/past
+      if (query.status) {
+        baseFilter.status = query.status;
+      }
     }
 
     // Use QueryBuilder for consistent query handling

@@ -55,6 +55,9 @@ export class QueryBuilder {
             contains: value,
             mode: "insensitive",
           };
+        } else if (key === "isActive" || key === "isRecurring" || key === "isApproved" || key === "isBanned" || key === "isEmailVerified") {
+          // Boolean fields - convert string to boolean
+          filter[key] = value === "true";
         } else {
           // Direct field filter
           filter[key] = value;

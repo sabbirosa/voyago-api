@@ -29,10 +29,11 @@ router.post(
 /*
  * GET /api/availability
  * Get availability slots (filtered by guideId, date, etc.)
- * Public endpoint (no auth required for checking availability)
+ * Optionally authenticated - if guide is logged in, filters by their guideId
  */
 router.get(
   "/",
+  checkAuth, // Optional - middleware will allow request even if no token
   validateRequest(getAvailabilitySlotsSchema),
   AvailabilityController.getAvailabilitySlots
 );

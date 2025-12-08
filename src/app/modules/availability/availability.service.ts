@@ -45,14 +45,19 @@ export const AvailabilityService = {
   },
 
   async getAvailabilitySlots(
-    query: Record<string, string>
+    query: Record<string, string>,
+    guideId?: string
   ): Promise<{
     slots: IAvailabilitySlotResponse[];
     meta: { page: number; limit: number; totalPage: number; total: number };
   }> {
     const baseFilter: any = {};
 
-    if (query.guideId) {
+    // If guideId is provided (from authenticated user), filter by it
+    // Otherwise use guideId from query if present
+    if (guideId) {
+      baseFilter.guideId = guideId;
+    } else if (query.guideId) {
       baseFilter.guideId = query.guideId;
     }
 
@@ -68,8 +73,15 @@ export const AvailabilityService = {
       baseFilter.isActive = query.isActive === "true";
     }
 
+    // Remove isActive and guideId from query to prevent QueryBuilder from processing them as strings
+    const filteredQuery = { ...query };
+    delete filteredQuery.isActive;
+    if (guideId) {
+      delete filteredQuery.guideId; // Use the guideId parameter instead
+    }
+
     // Use QueryBuilder for consistent query handling
-    const queryBuilder = new QueryBuilder(prisma.availabilitySlot, query)
+    const queryBuilder = new QueryBuilder(prisma.availabilitySlot, filteredQuery)
       .filter(baseFilter)
       .sort({ createdAt: "desc" })
       .paginate();

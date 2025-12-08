@@ -20,8 +20,18 @@ export const AvailabilityController = {
   }),
 
   getAvailabilitySlots: catchAsync(async (req: Request, res: Response) => {
+    // If user is authenticated and is a guide, filter by their guideId
+    // Otherwise, use guideId from query params if provided
+    let guideId: string | undefined;
+    if (req.user?.userId && req.user?.role === "GUIDE") {
+      guideId = req.user.userId;
+    } else if (req.query.guideId) {
+      guideId = req.query.guideId as string;
+    }
+    
     const { slots, meta } = await AvailabilityService.getAvailabilitySlots(
-      req.query as Record<string, string>
+      req.query as Record<string, string>,
+      guideId
     );
 
     sendResponse(res, {

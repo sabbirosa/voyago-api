@@ -4,6 +4,7 @@ import { requireGuide } from "../../middlewares/requireRole";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { UserController } from "./user.controller";
 import {
+  changePasswordSchema,
   createGuideProfileSchema,
   createProfileSchema,
   updateGuideProfileSchema,
@@ -18,13 +19,6 @@ const router = Router();
  * Requires: Authentication
  */
 router.get("/me", checkAuth, UserController.getMyProfile);
-
-/*
- * GET /api/users/:id
- * Get public user profile by ID
- * Requires: Authentication
- */
-router.get("/:id", checkAuth, UserController.getUserProfile);
 
 /*
  * PATCH /api/users/me/profile
@@ -75,6 +69,26 @@ router.post(
   validateRequest(createGuideProfileSchema),
   UserController.createGuideProfile
 );
+
+/*
+ * PATCH /api/users/me/change-password
+ * Change user password
+ * Requires: Authentication
+ */
+router.patch(
+  "/me/change-password",
+  checkAuth,
+  validateRequest(changePasswordSchema),
+  UserController.changePassword
+);
+
+/*
+ * GET /api/users/:id
+ * Get public user profile by ID
+ * Requires: Authentication
+ * NOTE: This must be last to avoid matching /me routes
+ */
+router.get("/:id", checkAuth, UserController.getUserProfile);
 
 export const UserRoutes = router;
 

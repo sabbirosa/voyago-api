@@ -367,6 +367,76 @@ export const AdminService = {
       popularCategories,
     };
   },
+
+  async getBookings(query: Record<string, string>): Promise<{
+    bookings: any[];
+    meta: { page: number; limit: number; totalPage: number; total: number };
+  }> {
+    const baseFilter: any = {};
+
+    if (query.status) {
+      baseFilter.status = query.status;
+    }
+
+    if (query.touristId) {
+      baseFilter.touristId = query.touristId;
+    }
+
+    if (query.guideId) {
+      baseFilter.guideId = query.guideId;
+    }
+
+    if (query.listingId) {
+      baseFilter.listingId = query.listingId;
+    }
+
+    // Handle date range filters
+    if (query.dateFrom) {
+      baseFilter.date = { ...baseFilter.date, gte: new Date(query.dateFrom) };
+    }
+
+    if (query.dateTo) {
+      baseFilter.date = { ...baseFilter.date, lte: new Date(query.dateTo) };
+    }
+
+    const queryBuilder = new QueryBuilder(prisma.booking, query)
+      .filter(baseFilter)
+      .sort({ createdAt: "desc" })
+      .paginate()
+      .includeRelations({
+        listing: {
+          include: {
+            images: {
+              orderBy: { order: "asc" },
+              take: 1,
+            },
+          },
+        },
+        tourist: {
+          include: {
+            profile: true,
+          },
+        },
+        guide: {
+          include: {
+            profile: true,
+            guideProfile: true,
+          },
+        },
+        payment: true,
+        review: true,
+      });
+
+    const [bookings, meta] = await Promise.all([
+      queryBuilder.build(),
+      queryBuilder.getMeta(),
+    ]);
+
+    return {
+      bookings,
+      meta,
+    };
+  },
 };
 
 

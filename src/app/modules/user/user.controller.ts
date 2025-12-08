@@ -79,5 +79,19 @@ export const UserController = {
       },
     });
   }),
+
+  changePassword: catchAsync(async (req: Request, res: Response) => {
+    await UserService.changePassword(
+      req.user!.userId,
+      req.body.currentPassword,
+      req.body.newPassword
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Password changed successfully",
+    });
+  }),
 };
 

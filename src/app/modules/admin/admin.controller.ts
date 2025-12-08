@@ -67,6 +67,20 @@ export const AdminController = {
       data: { analytics },
     });
   }),
+
+  getBookings: catchAsync(async (req: Request, res: Response) => {
+    const { bookings, meta } = await AdminService.getBookings(
+      req.query as Record<string, string>
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Bookings retrieved successfully",
+      data: { bookings },
+      meta,
+    });
+  }),
 };
 
 

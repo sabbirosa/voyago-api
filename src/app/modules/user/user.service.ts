@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import { prisma } from "../../config/prisma";
 import { AppError } from "../../errorHelpers/AppError";
@@ -321,6 +322,49 @@ export const UserService = {
       createdAt: created.createdAt,
       updatedAt: created.updatedAt,
     };
+  },
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> {
+    // Get user with password
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
+    if (!isPasswordValid) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "Current password is incorrect"
+      );
+    }
+
+    // Hash new password
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        password: newPasswordHash,
+      },
+    });
   },
 };
 

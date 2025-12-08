@@ -8,6 +8,7 @@ import {
   updateListingSchema,
   getUsersQuerySchema,
   getListingsQuerySchema,
+  getBookingsQuerySchema,
 } from "./admin.validation";
 
 const router = Router();
@@ -66,6 +67,17 @@ router.patch(
  * Requires: Admin role
  */
 router.get("/analytics", AdminController.getAnalytics);
+
+/*
+ * GET /api/admin/bookings
+ * Get all bookings with filters
+ * Requires: Admin role
+ */
+router.get(
+  "/bookings",
+  validateRequest(getBookingsQuerySchema),
+  AdminController.getBookings
+);
 
 export const AdminRoutes = router;
 

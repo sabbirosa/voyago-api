@@ -41,4 +41,18 @@ export const getListingsQuerySchema = z.object({
   }),
 });
 
+export const getBookingsQuerySchema = z.object({
+  query: z.object({
+    status: z.enum(["PENDING", "ACCEPTED", "DECLINED", "PAID", "COMPLETED", "CANCELLED"]).optional(),
+    touristId: z.string().optional(),
+    guideId: z.string().optional(),
+    listingId: z.string().optional(),
+    dateFrom: z.string().optional(),
+    dateTo: z.string().optional(),
+    page: z.string().optional(),
+    limit: z.string().optional(),
+    sort: z.string().optional(),
+  }),
+});
+
 

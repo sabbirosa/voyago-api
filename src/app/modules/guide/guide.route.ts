@@ -1,15 +1,19 @@
 import { Router } from "express";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { requireRole } from "../../middlewares/requireRole";
-import { getGuideAnalytics, getGuideBadges } from "./guide.controller";
+import { getGuideAnalytics, getGuideBadges, getPublicGuideProfile, getGuides } from "./guide.controller";
 
 const router = Router();
 
-router.use(checkAuth);
-router.use(requireRole("GUIDE"));
+// Public route - list all guides (must be before parameterized route)
+router.get("/", getGuides);
 
-router.get("/analytics", getGuideAnalytics);
-router.get("/badges", getGuideBadges);
+// Protected routes - require authentication and guide role (must be before parameterized route)
+router.get("/analytics", checkAuth, requireRole("GUIDE"), getGuideAnalytics);
+router.get("/badges", checkAuth, requireRole("GUIDE"), getGuideBadges);
+
+// Public route - no auth required (must be last to avoid matching /analytics or /badges)
+router.get("/:id", getPublicGuideProfile);
 
 export const GuideRoutes = router;
 
